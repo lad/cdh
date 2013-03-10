@@ -54,7 +54,7 @@ cdh-cd()
 
     # Save it in the history - use $PWD not $1 since cdspell may be active
     index=${#CDHISTORY[@]}
-    CDHISTORY[$CDINDEX]=$PWD
+    CDHISTORY[$index]=$PWD
     return 0
 }
 
