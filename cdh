@@ -1,14 +1,20 @@
-#!/bin/bash
-#
 # Author: louisadunne@gmail.com
 # Sun Mar 10 16:50:24 GMT 2013
 #
 # A few commands for keeping track of cd history
+#
+# Source this file:
+#     . cdh
+#
+# Adds aliases for:
+#   cd      cd with history
+#   cdh     show cd history
+#   cdcl    clear cd history
 
 # TODO
 # 1. Add file support for persistence
-# 2. Add named directories and a command to add a dir without moving to it (can
-#    be used in the load file too.
+# 2. Add named directories and a command to add a dir without moving to it
+#    (can be used in the load file too.
 
 alias   cd=cdh-cd
 alias   cdh=cdh-history
