@@ -14,7 +14,7 @@
 # TODO
 # 1. Add file support for persistence
 # 2. Add named directories and a command to add a dir without moving to it
-#    (can be used in the load file too.
+#    (can be used in the load file too).
 
 alias   cd=cdh-cd
 alias   cdh=cdh-history
@@ -45,7 +45,7 @@ cdh-cd()
         dir="$HOME"
     elif [[ $dir =~ ^[0-9]+ ]] || [[ $dir =~ ^-[0-9]+ ]]; then
         # positive or negative number supplied
-        cdh-get-index $dir
+        cdh-get-index $dir || return 1
         if [ $? -eq 0 ] && [ ! -d $1 ]; then
             \cd ${CDHISTORY[$index]}
             return 0
@@ -128,6 +128,7 @@ cdh-get-index()
 {
     if [ "$1" == "-" ]; then
         index=$(expr ${#CDHISTORY[@]} - 1)
+        return 0
     elif [[ $1 =~ ^[0-9]+ ]]; then
         index=$1
     elif [[ $1 =~ -[0-9]+ ]]; then
