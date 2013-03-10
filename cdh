@@ -18,10 +18,10 @@ fi
 
 cdh-cd()
 {
-    local d indexw
+    local dir index
 
     if [ "$1" == "" ]; then
-        d=~
+        dir=~
     elif [[ $1 =~ ^[0-9]+ ]] || [[ $1 =~ ^-[0-9]+ ]]; then
         cdh-get-index $1
         if [ $? -eq 0 ] && [ ! -d $1 ]; then
@@ -29,17 +29,14 @@ cdh-cd()
             return 0
         fi
 
-        d="$1"
+        dir="$1"
     else
-        d="$1"
+        dir="$1"
     fi
 
-    \cd "$d" || return 1
+    \cd "$dir" || return 1
 
     # Don't add the dir if it's already in the list
-    #if [ $CDINDEX -ge 0 ] && [ "${CDHISTORY[$CDINDEX]}" == "$PWD" ]; then
-        #return
-    #fi
     if [ $PWD == ~ ]; then
         # No point putting home dir into history
         return 0
@@ -86,10 +83,9 @@ cdh-clear()
 
     if [ "$CDHISTORY" == "" ]; then
         return 0
-    else
-        cdh-get-index $1 || return 1
     fi
 
+    cdh-get-index $1 || return 1
     if [ $index == -1 ]; then
         CDHISTORY=()
         CDINDEX=-1
