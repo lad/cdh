@@ -6,8 +6,11 @@ visited to allow easy recall. A few commands are defined to access and manipulat
 the history list:
 
 **cdh** shows the cd history
+
 **cdrm** clears one or more entries from the cd history.
+
 **cds** saves the history to ~/.cdh
+
 **cdl** loads ~/.cdh
 
 To install simply source the **cdh** script from your **.bashrc**
