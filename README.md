@@ -14,5 +14,8 @@ Bash CD History Utility
 0:/tmp 1:/usr/local
 /usr/local> cd 0
 /tmp> cd 1
-/usr/local> 
+/usr/local> cdcl
+<empty>
+/usr/local> cdh
+<empty>
 ```
