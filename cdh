@@ -1,0 +1,110 @@
+#!/bin/bash
+
+alias   cd=cdh-cd
+alias   cdh=cdh-echo
+alias   cdcl=cdh-clear
+
+if [ "$CDHISTORY" == "" ]; then
+    CDHISTORY=()
+    CDINDEX=-1
+fi
+
+cdh-cd()
+{
+    local d
+
+    if [ "$1" == "" ]; then
+        d=~
+    else
+        d="$1"
+    fi
+    \cd $d || return 1
+
+    # Don't add the dir if it's the same as last time
+    if [ $CDINDEX -ge 0 ] && [ "${CDHISTORY[$CDINDEX]}" == "$PWD" ]; then
+        return
+    fi
+
+    # Save it in the history - use $PWD not $1 since cdspell may be active
+    ((CDINDEX++))
+    CDHISTORY[$CDINDEX]=$PWD
+    return 0
+}
+
+cdh-echo()
+{
+    local index
+
+    if [ "$CDHISTORY" == "" ]; then
+        echo "<empty>"
+        return 0
+    else
+        cdh-get-index $1 || return 1
+    fi
+
+    if [ $index == -1 ]; then
+        for ((index = 0; index < ${#CDHISTORY[@]}; index++)); do
+            echo -n "${index}:${CDHISTORY[$index]} "
+        done
+        echo
+        return
+    else
+        echo ${CDHISTORY[$index]}
+    fi
+
+    return 0
+}
+
+cdh-clear()
+{
+    local index tmp
+
+    if [ "$CDHISTORY" == "" ]; then
+        return 0
+    else
+        cdh-get-index $1 || return 1
+    fi
+
+    if [ $index == -1 ]; then
+        CDHISTORY=()
+        CDINDEX=-1
+    else
+        tmp=()
+        for ((i = 0; i < ${#CDHISTORY[@]}; i++)); do
+            if [ $i -ne $index ]; then
+                tmp+=(${CDHISTORY[$i]})
+            fi
+        done
+        CDHISTORY=("${tmp[@]}")
+        ((CDINDEX--))
+    fi
+
+    cdh-echo
+    return 0
+}
+
+
+cdh-get-index()
+{
+    if [ "$1" == "-" ]; then
+        index=$CDINDEX
+    elif [[ $1 =~ ^[0-9]+ ]]; then
+        index=$1
+    elif [[ $1 =~ -[0-9]+ ]]; then
+        index=$(expr ${#CDHISTORY[@]} - $(echo $1 | tr -d '-'))
+    elif [ "$1" != "" ]; then
+        echo "Unknown arg: $1"
+        return 1
+    else
+        # do all
+        index=-1
+        return 0
+    fi
+
+    if [ $index -lt 0 -o $index -ge ${#CDHISTORY[@]} ]; then
+        echo "$1 out of range"
+        return 1
+    fi
+
+    return 0
+}
