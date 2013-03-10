@@ -2,8 +2,13 @@ Bash CD History Utility
 -----------------------
 
 Replacement for the **cd** command which maintains a history of the directories
-visited to allow easy recall. In addition the command **cdh** shows the cd
-history and **cdrm** clears one or more entries from the cd history.
+visited to allow easy recall. A few commands are defined to access and manipulate
+the history list:
+
+**cdh** shows the cd history
+**cdrm** clears one or more entries from the cd history.
+**cds** saves the history to ~/.cdh
+**cdl** loads ~/.cdh
 
 To install simply source the **cdh** script from your **.bashrc**
 

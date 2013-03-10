@@ -23,6 +23,7 @@
 # TODO
 # 1. Add named directories and a command to add a dir without moving to it
 #    (can be used in the load file too).
+# 2. On exit, lock ~/.cdh, load, merge with $CDHISTORY, save, unlock
 
 cd-cd()
 {
