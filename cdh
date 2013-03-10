@@ -71,7 +71,7 @@ cdh-history()
 
     if [ $index == -1 ]; then
         for ((index = 0; index < ${#CDHISTORY[@]}; index++)); do
-            echo "${index}:${CDHISTORY[$index]} "
+            echo "${index}: ${CDHISTORY[$index]} "
         done
         return
     else
