@@ -11,14 +11,23 @@ fi
 
 cdh-cd()
 {
-    local d
+    local d indexw
 
     if [ "$1" == "" ]; then
         d=~
+    elif [[ $1 =~ ^[0-9]+ ]] || [[ $1 =~ ^-[0-9]+ ]]; then
+        cdh-get-index $1
+        if [ $? -eq 0 ] && [ ! -d $1 ]; then
+            \cd ${CDHISTORY[$index]}
+            return 0
+        fi
+
+        d="$1"
     else
         d="$1"
     fi
-    \cd $d || return 1
+
+    \cd "$d" || return 1
 
     # Don't add the dir if it's the same as last time
     if [ $CDINDEX -ge 0 ] && [ "${CDHISTORY[$CDINDEX]}" == "$PWD" ]; then
