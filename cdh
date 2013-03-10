@@ -1,7 +1,7 @@
 #!/bin/bash
 
 alias   cd=cdh-cd
-alias   cdh=cdh-echo
+alias   cdh=cdh-history
 alias   cdcl=cdh-clear
 
 if [ "$CDHISTORY" == "" ]; then
@@ -29,10 +29,20 @@ cdh-cd()
 
     \cd "$d" || return 1
 
-    # Don't add the dir if it's the same as last time
-    if [ $CDINDEX -ge 0 ] && [ "${CDHISTORY[$CDINDEX]}" == "$PWD" ]; then
-        return
+    # Don't add the dir if it's already in the list
+    #if [ $CDINDEX -ge 0 ] && [ "${CDHISTORY[$CDINDEX]}" == "$PWD" ]; then
+        #return
+    #fi
+    if [ $PWD == ~ ]; then
+        # No point putting home dir into history
+        return 0
     fi
+
+    for ((index = 0; index < ${#CDHISTORY[@]}; index++)); do
+        if [ "$PWD" == "${CDHISTORY[$index]}" ]; then
+            return 0
+        fi
+    done
 
     # Save it in the history - use $PWD not $1 since cdspell may be active
     ((CDINDEX++))
@@ -40,7 +50,7 @@ cdh-cd()
     return 0
 }
 
-cdh-echo()
+cdh-history()
 {
     local index
 
@@ -53,9 +63,8 @@ cdh-echo()
 
     if [ $index == -1 ]; then
         for ((index = 0; index < ${#CDHISTORY[@]}; index++)); do
-            echo -n "${index}:${CDHISTORY[$index]} "
+            echo "${index}:${CDHISTORY[$index]} "
         done
-        echo
         return
     else
         echo ${CDHISTORY[$index]}
@@ -88,7 +97,7 @@ cdh-clear()
         ((CDINDEX--))
     fi
 
-    cdh-echo
+    cdh-history
     return 0
 }
 

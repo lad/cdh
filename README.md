@@ -4,18 +4,26 @@ Bash CD History Utility
 ```
 ~> cd
 ~> cdh
-0:/home/louis
+<empty>
 ~> cd /tmp
 /tmp> cdh
-0:/home/louis 1:/tmp
+0:/tmp
 /tmp> cd /usr/local
-0:/home/louis 1:/tmp 2:/usr/local
-/usr/local> cdcl 0
-0:/tmp 1:/usr/local
-/usr/local> cd 0
-/tmp> cd 1
-/usr/local> cdcl
+0:/tmp
+1:/usr/local
+/usr/local> cd /etc
+/etc> cdh
+0:/tmp
+1:/usr/local
+2:/etc
+/etc> cdcl 0
+0:/usr/local
+1:/etc
+/etc> cd 0
+/usr/local> cd 1
+/etc> cdcl
 <empty>
-/usr/local> cdh
+/usr/local> cd
+~> cdh
 <empty>
 ```
