@@ -1,4 +1,11 @@
 #!/bin/bash
+#
+# Author: louisadunne@gmail.com
+# Sun Mar 10 16:50:24 GMT 2013
+#
+# A few commands for keeping track of cd history
+
+# TODO add file support for persistence
 
 alias   cd=cdh-cd
 alias   cdh=cdh-history
@@ -87,6 +94,8 @@ cdh-clear()
         CDHISTORY=()
         CDINDEX=-1
     else
+        # unset leaves gaps so copy each element excluding the
+        # $index
         tmp=()
         for ((i = 0; i < ${#CDHISTORY[@]}; i++)); do
             if [ $i -ne $index ]; then
