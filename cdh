@@ -5,7 +5,9 @@
 #
 # A few commands for keeping track of cd history
 
-# TODO add file support for persistence
+# TODO
+# 1. Add file support for persistence
+# 2. Handle and ignore options to cd
 
 alias   cd=cdh-cd
 alias   cdh=cdh-history
@@ -13,7 +15,6 @@ alias   cdcl=cdh-clear
 
 if [ "$CDHISTORY" == "" ]; then
     CDHISTORY=()
-    CDINDEX=-1
 fi
 
 cdh-cd()
@@ -21,8 +22,9 @@ cdh-cd()
     local dir index
 
     if [ "$1" == "" ]; then
-        dir=~
+        dir="$HOME"
     elif [[ $1 =~ ^[0-9]+ ]] || [[ $1 =~ ^-[0-9]+ ]]; then
+        # positive or negative number supplied
         cdh-get-index $1
         if [ $? -eq 0 ] && [ ! -d $1 ]; then
             \cd ${CDHISTORY[$index]}
@@ -35,6 +37,8 @@ cdh-cd()
     fi
 
     \cd "$dir" || return 1
+    
+    # Use $PWD from here...
 
     # Don't add the dir if it's already in the list
     if [ $PWD == ~ ]; then
@@ -49,7 +53,7 @@ cdh-cd()
     done
 
     # Save it in the history - use $PWD not $1 since cdspell may be active
-    ((CDINDEX++))
+    index=${#CDHISTORY[@]}
     CDHISTORY[$CDINDEX]=$PWD
     return 0
 }
@@ -88,10 +92,8 @@ cdh-clear()
     cdh-get-index $1 || return 1
     if [ $index == -1 ]; then
         CDHISTORY=()
-        CDINDEX=-1
     else
-        # unset leaves gaps so copy each element excluding the
-        # $index
+        # unset leaves gaps so copy each element excluding the $index
         tmp=()
         for ((i = 0; i < ${#CDHISTORY[@]}; i++)); do
             if [ $i -ne $index ]; then
@@ -99,7 +101,6 @@ cdh-clear()
             fi
         done
         CDHISTORY=("${tmp[@]}")
-        ((CDINDEX--))
     fi
 
     cdh-history
@@ -110,7 +111,7 @@ cdh-clear()
 cdh-get-index()
 {
     if [ "$1" == "-" ]; then
-        index=$CDINDEX
+        index=$(expr ${#CDHISTORY[@]} - 1)
     elif [[ $1 =~ ^[0-9]+ ]]; then
         index=$1
     elif [[ $1 =~ -[0-9]+ ]]; then
