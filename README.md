@@ -28,7 +28,7 @@ there's no need for a shortcut to that.
 #
 ```
 
-Entries in a cd history list can be access by their index in the list:
+Entries in a cd history list can be accessed by their index in the list:
 
 ```
 # cd 0
@@ -67,6 +67,7 @@ index can be supplied
 1: /usr/local/bin
 # cdcl
 <empty>
+```
 
 
 If **cd <index>** is used in a directory that contains a directory that matches
