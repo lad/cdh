@@ -3,15 +3,34 @@ Bash CD History Utility
 
 Replacement for the **cd** command which maintains a history of the directories
 visited to allow easy recall. In addition the command **cdh** show the cd
-history and **cdcl** clears one or more entries from the history.
+history and **cdcl** clears one or more entries from the cd history.
 
-Entries in a cd history list can be access by their index in the list:
+Entries are added to the history list as you move to different directories. The
+same directory is never added twice. The home directory is never added since
+there's no need for a shortcut to that.
 
 ```
+# cdh
+<empty>
+# cd
+# cdh
+<empty>
+# cd /tmp
+# cdh
+0: /tmp
+# cd /usr
+# cd /etc
+# cd /usr
 # cdh
 0: /tmp
 1: /usr
 2: /etc
+#
+```
+
+Entries in a cd history list can be access by their index in the list:
+
+```
 # cd 0
 # pwd
 /tmp
@@ -53,3 +72,16 @@ index can be supplied
 If **cd <index>** is used in a directory that contains a directory that matches
 "<index>" exactly it cd's into that directory and behaves as the bash builtin
 would behave.
+
+```
+# cd /tmp
+# cdh
+0: tmp
+# cd 0
+# pwd
+/tmp
+# mkdir 0
+# cd 0
+# pwd
+/tmp/0
+```
