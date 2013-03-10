@@ -7,7 +7,8 @@
 
 # TODO
 # 1. Add file support for persistence
-# 2. Handle and ignore options to cd
+# 2. Add named directories and a command to add a dir without moving to it (can
+#    be used in the load file too.
 
 alias   cd=cdh-cd
 alias   cdh=cdh-history
@@ -19,28 +20,37 @@ fi
 
 cdh-cd()
 {
-    local dir index
+    local dir index args
 
-    if [ "$1" == "" ]; then
+    args=()
+    while [ $# -gt 0 ]; do
+        case $1 in 
+            -[a-Z]*)
+                args+=($1)
+                shift
+                ;;
+            *)
+                dir="$*"
+                break
+        esac
+    done
+
+    if [ "$dir" == "" ]; then
         dir="$HOME"
-    elif [[ $1 =~ ^[0-9]+ ]] || [[ $1 =~ ^-[0-9]+ ]]; then
+    elif [[ $dir =~ ^[0-9]+ ]] || [[ $dir =~ ^-[0-9]+ ]]; then
         # positive or negative number supplied
-        cdh-get-index $1
+        cdh-get-index $dir
         if [ $? -eq 0 ] && [ ! -d $1 ]; then
             \cd ${CDHISTORY[$index]}
             return 0
         fi
-
-        dir="$1"
-    else
-        dir="$1"
     fi
 
-    \cd "$dir" || return 1
+    \cd ${args[@]} "$dir" || return 1
 
     # Use $PWD from here...
 
-    # No point putting home dir into history
+    # No point saving home dir
     if [ "$PWD" == "$HOME" ]; then
         return 0
     fi
