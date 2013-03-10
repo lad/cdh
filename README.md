@@ -3,7 +3,7 @@ Bash CD History Utility
 
 Replacement for the **cd** command which maintains a history of the directories
 visited to allow easy recall. In addition the command **cdh** shows the cd
-history and **cdcl** clears one or more entries from the cd history.
+history and **cdrm** clears one or more entries from the cd history.
 
 To install simply source the **cdh** script from your **.bashrc**
 
@@ -54,7 +54,7 @@ Negative numbers index from the end of the history list:
 /usr
 ```
 
-**cdcl** without arguments will clear the history list or an index can be
+**cdrm** without arguments will clear the history list or an index can be
 supplied to remove a single element. As with **cd** a postive or negative
 index can be supplied
 
@@ -64,14 +64,14 @@ index can be supplied
 1: /usr
 2: /etc
 3: /usr/local/bin
-# cdcl 0
+# cdrm 0
 0: /usr
 1: /etc
 2: /usr/local/bin
-# cdcl -2
+# cdrm -2
 0: /usr
 1: /usr/local/bin
-# cdcl
+# cdrm
 <empty>
 ```
 
