@@ -37,22 +37,22 @@ cdh-cd()
     fi
 
     \cd "$dir" || return 1
-    
+
     # Use $PWD from here...
 
-    # Don't add the dir if it's already in the list
-    if [ $PWD == ~ ]; then
-        # No point putting home dir into history
+    # No point putting home dir into history
+    if [ "$PWD" == "$HOME" ]; then
         return 0
     fi
 
+    # Don't add the dir if it's already in the list
     for ((index = 0; index < ${#CDHISTORY[@]}; index++)); do
         if [ "$PWD" == "${CDHISTORY[$index]}" ]; then
             return 0
         fi
     done
 
-    # Save it in the history - use $PWD not $1 since cdspell may be active
+    # Save it
     index=${#CDHISTORY[@]}
     CDHISTORY[$index]=$PWD
     return 0
@@ -93,7 +93,7 @@ cdh-clear()
     if [ $index == -1 ]; then
         CDHISTORY=()
     else
-        # unset leaves gaps so copy each element excluding the $index
+        # unset leaves gaps so copy each element excluding $index
         tmp=()
         for ((i = 0; i < ${#CDHISTORY[@]}; i++)); do
             if [ $i -ne $index ]; then

@@ -75,7 +75,6 @@ index can be supplied
 <empty>
 ```
 
-
 If **cd <index>** is used in a directory that contains a directory that matches
 the index exactly it cd's into that directory and behaves as the bash builtin
 would behave (depending on your bash settings).
