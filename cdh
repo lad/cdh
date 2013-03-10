@@ -6,33 +6,34 @@
 # Source this file:
 #     . cdh
 #
-# Adds aliases for:
-#   cd      cd with history
-#   cdh     show cd history
-#   cdcl    clear cd history
+# Functions:
+#   cd-cd()         cd with history
+#   cd-history()    show cd history
+#   cd-clear()      clear cd history
+#   cd-load()       load ~/.cdh overwring current history
+#   cd-save()       save to ~/.cdh
+#
+# Aliases:
+#   cd              cd-cd()
+#   cdh             cd-history()
+#   cdrm            cd-rm()
+#   cdl             cd-load(); cd-history()
+#   cds             cd-save()
 
 # TODO
-# 1. Add file support for persistence
-# 2. Add named directories and a command to add a dir without moving to it
+# 1. Add named directories and a command to add a dir without moving to it
 #    (can be used in the load file too).
 
-alias   cd=cdh-cd
-alias   cdh=cdh-history
-alias   cdcl=cdh-clear
-
-if [ "$CDHISTORY" == "" ]; then
-    CDHISTORY=()
-fi
-
-cdh-cd()
+cd-cd()
 {
     local dir index args
 
-    args=()
+    # parse out any cd options
+    options=()
     while [ $# -gt 0 ]; do
-        case $1 in 
+        case $1 in
             -[a-zA-Z]*)
-                args+=($1)
+                options+=($1)
                 shift
                 ;;
             *)
@@ -45,14 +46,14 @@ cdh-cd()
         dir="$HOME"
     elif [[ $dir =~ ^[0-9]+ ]] || [[ $dir =~ ^-[0-9]+ ]]; then
         # positive or negative number supplied
-        cdh-get-index $dir || return 1
+        cd-get-index $dir || return 1
         if [ $? -eq 0 ] && [ ! -d $1 ]; then
-            \cd ${CDHISTORY[$index]}
+            \cd ${CDHISTORY[$index]} || return 1
             return 0
         fi
     fi
 
-    \cd ${args[@]} "$dir" || return 1
+    \cd ${options[@]} "$dir" || return 1
 
     # Use $PWD from here...
 
@@ -71,24 +72,57 @@ cdh-cd()
     # Save it
     index=${#CDHISTORY[@]}
     CDHISTORY[$index]=$PWD
+
     return 0
 }
 
-cdh-history()
+cd-save()
 {
-    local index
+    (
+        cd-history -n
+    ) >| ~/.cdh
+}
+
+cd-load()
+{
+    if [ -f ~/.cdh ]; then
+        CDHISTORY=($(cat ~/.cdh))
+    else
+        CDHISTORY=()
+    fi
+}
+
+cd-history()
+{
+    local index none
+
+    if [ "$1" == "-n" ]; then
+        none=1
+        shift
+    else
+        none=0
+    fi
 
     if [ "$CDHISTORY" == "" ]; then
-        echo "<empty>"
+        if [ $none -eq 0 ]; then
+            echo "<empty>"
+        fi
         return 0
     else
-        cdh-get-index $1 || return 1
+        cd-get-index $1 || return 1
     fi
 
     if [ $index == -1 ]; then
+        # show all
+        (
         for ((index = 0; index < ${#CDHISTORY[@]}; index++)); do
-            echo "${index}: ${CDHISTORY[$index]} "
+            if [ $none -eq 0 ]; then
+                echo "${index} ${CDHISTORY[$index]} "
+            else
+                echo "${CDHISTORY[$index]} "
+            fi
         done
+        ) | column -t
         return
     else
         echo ${CDHISTORY[$index]}
@@ -97,7 +131,7 @@ cdh-history()
     return 0
 }
 
-cdh-clear()
+cd-rm()
 {
     local index tmp
 
@@ -105,7 +139,7 @@ cdh-clear()
         return 0
     fi
 
-    cdh-get-index $1 || return 1
+    cd-get-index $1 || return 1
     if [ $index == -1 ]; then
         CDHISTORY=()
     else
@@ -119,19 +153,21 @@ cdh-clear()
         CDHISTORY=("${tmp[@]}")
     fi
 
-    cdh-history
+    cd-history
     return 0
 }
 
 
-cdh-get-index()
+cd-get-index()
 {
     if [ "$1" == "-" ]; then
         index=$(expr ${#CDHISTORY[@]} - 1)
         return 0
     elif [[ $1 =~ ^[0-9]+ ]]; then
+        # positive $1
         index=$1
     elif [[ $1 =~ -[0-9]+ ]]; then
+        # negative $1
         index=$(expr ${#CDHISTORY[@]} - $(echo $1 | tr -d '-'))
     elif [ "$1" != "" ]; then
         echo "Unknown arg: $1"
@@ -149,3 +185,15 @@ cdh-get-index()
 
     return 0
 }
+
+if [ "$CDHISTORY" == "" ]; then
+    cd-load
+fi
+
+alias   cd=cd-cd
+alias   cdh=cd-history
+alias   cdrm=cd-rm
+alias   cdl="cd-load; cd-history"
+alias   cds=cd-save
+
+trap cds EXIT
