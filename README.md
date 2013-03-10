@@ -1,6 +1,7 @@
 Bash CD History Utility
-=======================
+-----------------------
 
+```
 ~> cd
 ~> cdh
 0:/home/louis
@@ -14,3 +15,4 @@ Bash CD History Utility
 /usr/local> cd 0
 /tmp> cd 1
 /usr/local> 
+```
