@@ -31,7 +31,7 @@ cdh-cd()
     args=()
     while [ $# -gt 0 ]; do
         case $1 in 
-            -[a-Z]*)
+            -[a-zA-Z]*)
                 args+=($1)
                 shift
                 ;;
