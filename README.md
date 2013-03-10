@@ -5,6 +5,12 @@ Replacement for the **cd** command which maintains a history of the directories
 visited to allow easy recall. In addition the command **cdh** shows the cd
 history and **cdcl** clears one or more entries from the cd history.
 
+To install simply source the **cdh** script from your **.bashrc**
+
+```
+. <some-dir>/cdh
+```
+
 Entries are added to the history list as you move to different directories. The
 same directory is never added twice. The home directory is never added since
 there's no need for a shortcut to that.
