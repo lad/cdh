@@ -36,7 +36,7 @@ cd-check-index()
 
 cd-cd()
 {
-    local arg index arg
+    local arg index
 
     # parse out any cd options
     options=()
