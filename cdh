@@ -218,6 +218,6 @@ alias   cd=cd-cd
 alias   cdh=cd-history
 alias   cdrm=cd-rm
 alias   cdl="cd-load; cd-history"
-alias   cds="cd-save; cd-history"
+alias   cds=cd-save
 
 trap cds EXIT
