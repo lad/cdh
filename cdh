@@ -11,7 +11,7 @@
 #   cd-history()    show cd history
 #   cd-clear()      clear cd history
 #   cd-load()       load ~/.cdh overwring current history
-#   cd-save()       save to ~/.cdh
+#   cd-save()       save to ~/.cdh [Merge by default, -o to overwrite]
 #
 # Aliases:
 #   cd              cd-cd()
@@ -23,7 +23,9 @@
 # TODO
 # 1. Add named directories and a command to add a dir without moving to it
 #    (can be used in the load file too).
-# 2. On exit, lock ~/.cdh, load, merge with $CDHISTORY, save, unlock
+
+DOTFILE=~/.cdh
+LOCKFILE=/var/lock/cdh
 
 cd-cd()
 {
@@ -33,13 +35,14 @@ cd-cd()
     options=()
     while [ $# -gt 0 ]; do
         case $1 in
-            -[a-zA-Z]*)
+            -[-a-zA-Z]*)
                 options+=($1)
                 shift
                 ;;
             *)
                 dir="$*"
                 break
+                ;;
         esac
     done
 
@@ -59,15 +62,11 @@ cd-cd()
     # Use $PWD from here...
 
     # No point saving home dir
-    if [ "$PWD" == "$HOME" ]; then
-        return 0
-    fi
+    [ "$PWD" == "$HOME" ] && return 0
 
     # Don't add the dir if it's already in the list
     for ((index = 0; index < ${#CDHISTORY[@]}; index++)); do
-        if [ "$PWD" == "${CDHISTORY[$index]}" ]; then
-            return 0
-        fi
+        [ "$PWD" == "${CDHISTORY[$index]}" ] && return 0
     done
 
     # Save it
@@ -77,20 +76,76 @@ cd-cd()
     return 0
 }
 
+cd-lock()
+{
+    exec 200>|$LOCKFILE || return $?
+
+    flock -x -w 5 200
+    if [ $? -ne 0 ]; then
+        echo "cd-save: Failed to get a lock on the lockfile after 5 seconds."
+        return 1
+    fi
+
+    return 0
+}
+
+cd-unlock()
+{
+    local rc=0
+
+    flock -o 200
+    if [ $? -ne 0 ]; then
+        echo "cd-save: Failed to unlock the lockfile."
+        rc=1
+    fi
+
+    exec 200>&-
+    if [ $? -ne 0 ]; then
+        echo "cd-save: Failed to close the lockfile descriptor (200)"
+        rc=1
+    fi
+
+    return $rc
+}
+
 cd-save()
 {
+    local stored
+
+    cd-lock || return $?
+
+    # Grab the contents of .cdh before we overwrite it
+    stored=($(test -f "$DOTFILE" && cat $DOTFILE))
+
+    [ "$1" != "" ] && sleep $1
+
+    # Merge our current history and the previous contents of .cdh (unless -o
+    # is used)
     (
         cd-history -n
-    ) >| ~/.cdh
+        # -o means overwrite (dont merge)
+        if [ "$1" != "-o" ]; then
+            for s in ${stored[@]}; do
+                echo $s
+            done
+        fi
+    ) | sort | uniq >| $DOTFILE
+
+    cd-unlock || return $?
+
+    cd-load
+    cd-history
+    return 0
 }
 
 cd-load()
 {
-    if [ -f ~/.cdh ]; then
-        CDHISTORY=($(cat ~/.cdh))
-    else
-        CDHISTORY=()
-    fi
+    cd-lock || return $?
+
+    CDHISTORY=($(test -f "$DOTFILE" && cat $DOTFILE))
+
+    cd-unlock || return $?
+    return 0
 }
 
 cd-history()
