@@ -24,12 +24,19 @@
 # 1. Add named directories and a command to add a dir without moving to it
 #    (can be used in the load file too).
 
-DOTFILE=~/.cdh
-LOCKFILE=/var/lock/cdh
+cd-check-index()
+{
+    if [ $1 -lt ${#CDHISTORY[@]} ]; then
+        return 0
+    else
+        echo "$1 out of range"
+        return 1
+    fi
+}
 
 cd-cd()
 {
-    local dir index args
+    local arg index args
 
     # parse out any cd options
     options=()
@@ -40,24 +47,23 @@ cd-cd()
                 shift
                 ;;
             *)
-                dir="$*"
+                arg="$*"
                 break
                 ;;
         esac
     done
 
-    if [ "$dir" == "" ]; then
-        dir="$HOME"
-    elif [[ $dir =~ ^[0-9]+ ]] || [[ $dir =~ ^-[0-9]+ ]]; then
-        # positive or negative number supplied
-        cd-get-index $dir || return 1
-        if [ $? -eq 0 ] && [ ! -d $1 ]; then
-            \cd ${CDHISTORY[$index]} || return 1
-            return 0
+    if [ "$arg" == "" ]; then
+        arg="$HOME"
+    elif [[ $arg =~ ^[0-9]+ ]]; then
+        if [ $? -eq 0 ] && [ ! -d $arg ]; then
+            cd-check-index $arg || return 1
+            \cd ${CDHISTORY[$arg]}
+            return $?
         fi
     fi
 
-    \cd ${options[@]} "$dir" || return 1
+    \cd ${options[@]} "$arg" || return 1
 
     # Use $PWD from here...
 
@@ -78,7 +84,7 @@ cd-cd()
 
 cd-lock()
 {
-    exec 200>|$LOCKFILE || return $?
+    exec 200>|/var/lock/cdh || return $?
 
     flock -x -w 5 200
     if [ $? -ne 0 ]; then
@@ -115,9 +121,7 @@ cd-save()
     cd-lock || return $?
 
     # Grab the contents of .cdh before we overwrite it
-    stored=($(test -f "$DOTFILE" && cat $DOTFILE))
-
-    [ "$1" != "" ] && sleep $1
+    stored=($(test -f ~/.cdh && cat ~/.cdh))
 
     # Merge our current history and the previous contents of .cdh (unless -o
     # is used)
@@ -129,7 +133,7 @@ cd-save()
                 echo $s
             done
         fi
-    ) | sort | uniq >| $DOTFILE
+    ) | sort | uniq >| ~/.cdh
 
     cd-unlock || return $?
 
@@ -142,7 +146,7 @@ cd-load()
 {
     cd-lock || return $?
 
-    CDHISTORY=($(test -f "$DOTFILE" && cat $DOTFILE))
+    CDHISTORY=($(test -f ~/.cdh && cat ~/.cdh))
 
     cd-unlock || return $?
     return 0
@@ -160,15 +164,11 @@ cd-history()
     fi
 
     if [ "$CDHISTORY" == "" ]; then
-        if [ $none -eq 0 ]; then
-            echo "<empty>"
-        fi
+        [ $none -eq 0 ] && echo "<empty>"
         return 0
-    else
-        cd-get-index $1 || return 1
     fi
 
-    if [ $index == -1 ]; then
+    if [ "$1" == "" ]; then
         # show all
         (
         for ((index = 0; index < ${#CDHISTORY[@]}; index++)); do
@@ -179,9 +179,9 @@ cd-history()
             fi
         done
         ) | column -t
-        return
     else
-        echo ${CDHISTORY[$index]}
+        cd-check-index $1 || return 1
+        echo ${CDHISTORY[$1]}
     fi
 
     return 0
@@ -189,20 +189,20 @@ cd-history()
 
 cd-rm()
 {
-    local index tmp
+    local tmp
 
     if [ "$CDHISTORY" == "" ]; then
         return 0
     fi
 
-    cd-get-index $1 || return 1
-    if [ $index == -1 ]; then
+    if [ "$1" == "" ]; then
         CDHISTORY=()
     else
-        # unset leaves gaps so copy each element excluding $index
+        cd-check-index $1 || return 1
+        # unset leaves gaps so copy each element excluding $1
         tmp=()
         for ((i = 0; i < ${#CDHISTORY[@]}; i++)); do
-            if [ $i -ne $index ]; then
+            if [ $i -ne $1 ]; then
                 tmp+=(${CDHISTORY[$i]})
             fi
         done
@@ -213,34 +213,6 @@ cd-rm()
     return 0
 }
 
-
-cd-get-index()
-{
-    if [ "$1" == "-" ]; then
-        index=$(expr ${#CDHISTORY[@]} - 1)
-        return 0
-    elif [[ $1 =~ ^[0-9]+ ]]; then
-        # positive $1
-        index=$1
-    elif [[ $1 =~ -[0-9]+ ]]; then
-        # negative $1
-        index=$(expr ${#CDHISTORY[@]} - $(echo $1 | tr -d '-'))
-    elif [ "$1" != "" ]; then
-        echo "Unknown arg: $1"
-        return 1
-    else
-        # do all
-        index=-1
-        return 0
-    fi
-
-    if [ $index -lt 0 -o $index -ge ${#CDHISTORY[@]} ]; then
-        echo "$1 out of range"
-        return 1
-    fi
-
-    return 0
-}
 
 if [ "$CDHISTORY" == "" ]; then
     cd-load
