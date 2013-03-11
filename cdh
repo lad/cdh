@@ -8,14 +8,14 @@
 #
 # Functions:
 #   cd-cd()         cd with history
-#   cd-history()    show cd history
+#   cd-history()    show cd history (-n no line numbers)
 #   cd-clear()      clear cd history
 #   cd-load()       load ~/.cdh overwring current history
-#   cd-save()       save to ~/.cdh [Merge by default, -o to overwrite]
+#   cd-save()       save to ~/.cdh (Merge by default, -o to overwrite)
 #
 # Aliases:
 #   cd              cd-cd()
-#   cdh             cd-history()
+#   cdh [-n]        cd-history()
 #   cdrm            cd-rm()
 #   cdl             cd-load(); cd-history()
 #   cds [-o]        cd-save()
@@ -53,6 +53,7 @@ cd-cd()
         esac
     done
 
+    # Look in history for numeric args
     if [[ $arg =~ ^[0-9]+ ]] && [ ! -d $arg ]; then
         cd-check-index $arg || return 1
         \cd ${CDHISTORY[$arg]}
@@ -61,9 +62,6 @@ cd-cd()
 
     \cd ${options[@]} "$arg" || return 1
 
-    # Use $PWD from here...
-
-    # No point saving home dir
     [ "$PWD" == "$HOME" ] && return 0
 
     # Don't add the dir if it's already in the list
@@ -71,7 +69,6 @@ cd-cd()
         [ "$PWD" == "${CDHISTORY[$index]}" ] && return 0
     done
 
-    # Save it
     CDHISTORY+=($PWD)
     return 0
 }
@@ -115,8 +112,8 @@ cd-save()
     # Grab the contents of .cdh before we overwrite it
     stored=($(test -f ~/.cdh && cat ~/.cdh))
 
-    # Merge our current history and the previous contents of .cdh (unless -o
-    # is used)
+    # The default is to merge the cd history with existing ~.cdh
+    # -o overwrites ~/.cdh with the current history
     (
         cd-history -n
         # -o means overwrite (dont merge)
@@ -129,6 +126,7 @@ cd-save()
 
     cd-unlock || return $?
     cd-load
+    cd-history
     return 0
 }
 
@@ -183,8 +181,10 @@ cd-rm()
     fi
 
     if [ "$1" == "" ]; then
+        # clear all cd history
         CDHISTORY=()
     else
+        # clear entry $1
         cd-check-index $1 || return 1
         # unset leaves gaps so copy each element excluding $1
         tmp=()
