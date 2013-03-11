@@ -36,7 +36,7 @@ cd-check-index()
 
 cd-cd()
 {
-    local arg index args
+    local arg index arg
 
     # parse out any cd options
     options=()
@@ -53,14 +53,10 @@ cd-cd()
         esac
     done
 
-    if [ "$arg" == "" ]; then
-        arg="$HOME"
-    elif [[ $arg =~ ^[0-9]+ ]]; then
-        if [ $? -eq 0 ] && [ ! -d $arg ]; then
-            cd-check-index $arg || return 1
-            \cd ${CDHISTORY[$arg]}
-            return $?
-        fi
+    if [[ $arg =~ ^[0-9]+ ]] && [ ! -d $arg ]; then
+        cd-check-index $arg || return 1
+        \cd ${CDHISTORY[$arg]}
+        return $?
     fi
 
     \cd ${options[@]} "$arg" || return 1
