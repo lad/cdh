@@ -76,9 +76,7 @@ cd-cd()
     done
 
     # Save it
-    index=${#CDHISTORY[@]}
-    CDHISTORY[$index]=$PWD
-
+    CDHISTORY+=($PWD)
     return 0
 }
 
@@ -91,7 +89,6 @@ cd-lock()
         echo "Failed to get a lock on the lockfile after 5 seconds."
         return 1
     fi
-
     return 0
 }
 
@@ -110,7 +107,6 @@ cd-unlock()
         echo "Failed to close the lockfile descriptor (200)"
         rc=1
     fi
-
     return $rc
 }
 
@@ -179,7 +175,6 @@ cd-history()
         cd-check-index $1 || return 1
         echo ${CDHISTORY[$1]}
     fi
-
     return 0
 }
 
