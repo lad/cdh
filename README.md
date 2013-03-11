@@ -50,21 +50,8 @@ Entries in a cd history list can be accessed by their index in the list:
 /tmp
 ```
 
-Negative numbers index from the end of the history list:
-
-```
-# cdh
-0: /tmp
-1: /usr
-2: /etc
-# cd -2
-# pwd
-/usr
-```
-
 **cdrm** without arguments will clear the history list or an index can be
-supplied to remove a single element. As with **cd** a postive or negative
-index can be supplied
+supplied to remove a single element.
 
 ```
 # cdh
