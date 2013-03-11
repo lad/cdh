@@ -63,7 +63,7 @@ supplied to remove a single element.
 0: /usr
 1: /etc
 2: /usr/local/bin
-# cdrm -2
+# cdrm 1
 0: /usr
 1: /usr/local/bin
 # cdrm
