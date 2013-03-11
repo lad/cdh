@@ -18,7 +18,7 @@
 #   cdh             cd-history()
 #   cdrm            cd-rm()
 #   cdl             cd-load(); cd-history()
-#   cds             cd-save()
+#   cds [-o]        cd-save()
 
 # TODO
 # 1. Add named directories and a command to add a dir without moving to it
@@ -88,7 +88,7 @@ cd-lock()
 
     flock -x -w 5 200
     if [ $? -ne 0 ]; then
-        echo "cd-save: Failed to get a lock on the lockfile after 5 seconds."
+        echo "Failed to get a lock on the lockfile after 5 seconds."
         return 1
     fi
 
@@ -101,13 +101,13 @@ cd-unlock()
 
     flock -o 200
     if [ $? -ne 0 ]; then
-        echo "cd-save: Failed to unlock the lockfile."
+        echo "Failed to unlock the lockfile."
         rc=1
     fi
 
     exec 200>&-
     if [ $? -ne 0 ]; then
-        echo "cd-save: Failed to close the lockfile descriptor (200)"
+        echo "Failed to close the lockfile descriptor (200)"
         rc=1
     fi
 
@@ -136,18 +136,14 @@ cd-save()
     ) | sort | uniq >| ~/.cdh
 
     cd-unlock || return $?
-
     cd-load
-    cd-history
     return 0
 }
 
 cd-load()
 {
     cd-lock || return $?
-
     CDHISTORY=($(test -f ~/.cdh && cat ~/.cdh))
-
     cd-unlock || return $?
     return 0
 }
@@ -222,6 +218,6 @@ alias   cd=cd-cd
 alias   cdh=cd-history
 alias   cdrm=cd-rm
 alias   cdl="cd-load; cd-history"
-alias   cds=cd-save
+alias   cds="cd-save; cd-history"
 
 trap cds EXIT
