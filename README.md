@@ -16,7 +16,7 @@ the history list:
 To install simply source the cdh script from your .bashrc
 
 ```bash
-. <some-dir>/cdh
+$ . <some-dir>/cdh
 ```
 
 Entries are added to the history list as you move to different directories. The
@@ -39,7 +39,6 @@ $ cdh
 0: /tmp
 1: /usr
 2: /etc
-$
 ```
 
 Entries in a cd history list can be accessed by their index in the list:
