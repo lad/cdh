@@ -36,7 +36,7 @@ cd-check-index()
 
 cd-cd()
 {
-    local arg index
+    local arg i
 
     # parse out any cd options
     options=()
@@ -62,11 +62,12 @@ cd-cd()
 
     \cd ${options[@]} "$arg" || return 1
 
+    # Don't add $HOME
     [ "$PWD" == "$HOME" ] && return 0
 
     # Don't add the dir if it's already in the list
-    for ((index = 0; index < ${#CDHISTORY[@]}; index++)); do
-        [ "$PWD" == "${CDHISTORY[$index]}" ] && return 0
+    for ((i = 0; i < ${#CDHISTORY[@]}; i++)); do
+        [ "$PWD" == "${CDHISTORY[$i]}" ] && return 0
     done
 
     CDHISTORY+=($PWD)
@@ -140,7 +141,7 @@ cd-load()
 
 cd-history()
 {
-    local index none
+    local i none
 
     if [ "$1" == "-n" ]; then
         none=1
@@ -157,11 +158,11 @@ cd-history()
     if [ "$1" == "" ]; then
         # show all
         (
-        for ((index = 0; index < ${#CDHISTORY[@]}; index++)); do
+        for ((i = 0; i < ${#CDHISTORY[@]}; i++)); do
             if [ $none -eq 0 ]; then
-                echo "${index} ${CDHISTORY[$index]} "
+                echo "${i} ${CDHISTORY[$i]} "
             else
-                echo "${CDHISTORY[$index]} "
+                echo "${CDHISTORY[$i]} "
             fi
         done
         ) | column -t
@@ -174,7 +175,7 @@ cd-history()
 
 cd-rm()
 {
-    local tmp
+    local tmp i
 
     if [ "$CDHISTORY" == "" ]; then
         return 0
