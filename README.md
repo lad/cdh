@@ -5,13 +5,13 @@ Replacement for the **cd** command which maintains a history of the directories
 visited to allow easy recall. A few commands are defined to access and manipulate
 the history list:
 
-**cdh** shows the cd history
+`cdh shows the cd history`
 
-**cdrm** clears one or more entries from the cd history.
+`cdrm clears one or more entries from the cd history.`
 
-**cds** saves the history to ~/.cdh
+`cds saves the history to ~/.cdh`
 
-**cdl** loads ~/.cdh
+`cdl loads ~/.cdh`
 
 To install simply source the **cdh** script from your **.bashrc**
 
@@ -23,7 +23,7 @@ Entries are added to the history list as you move to different directories. The
 same directory is never added twice. The home directory is never added since
 there's no need for a shortcut to that.
 
-```
+```base
 # cdh
 <empty>
 # cd
@@ -44,7 +44,7 @@ there's no need for a shortcut to that.
 
 Entries in a cd history list can be accessed by their index in the list:
 
-```
+```bash
 # cd 0
 # pwd
 /tmp
@@ -53,7 +53,7 @@ Entries in a cd history list can be accessed by their index in the list:
 **cdrm** without arguments will clear the history list or an index can be
 supplied to remove a single element.
 
-```
+```bash
 # cdh
 0: /tmp
 1: /usr
@@ -70,11 +70,11 @@ supplied to remove a single element.
 <empty>
 ```
 
-If **cd <index>** is used in a directory that contains a directory that matches
+If `cd <index>` is used in a directory that contains a directory that matches
 the index exactly it cd's into that directory and behaves as the bash builtin
 would behave (depending on your bash settings).
 
-```
+```bash
 # cd /tmp
 # cdh
 0: tmp
