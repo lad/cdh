@@ -26,11 +26,11 @@
 
 cd-check-index()
 {
-    if [ $1 -lt ${#CDHISTORY[@]} ]; then
-        return 0
-    else
+    if [ $1 -lt 0 -o $1 -ge ${#CDHISTORY[@]} ]; then
         echo "$1 out of range"
         return 1
+    else
+        return 0
     fi
 }
 
@@ -160,9 +160,11 @@ cd-history()
         (
         for ((i = 0; i < ${#CDHISTORY[@]}; i++)); do
             if [ $none -eq 0 ]; then
-                echo "${i} ${CDHISTORY[$i]} "
+                # flips between 37 and 34 (white/blue)
+                n=$(echo "37 - (3 * ($i % 2))" | bc)
+                echo -e "\e[1;${n}m${i} ${CDHISTORY[$i]}\e[0m"
             else
-                echo "${CDHISTORY[$i]} "
+                echo -e "${CDHISTORY[$i]} "
             fi
         done
         ) | column -t
