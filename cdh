@@ -139,6 +139,7 @@ cd-load()
     return 0
 }
 
+# --- EXPERIMENTAL ---
 cd-history()
 {
     local i none
@@ -201,6 +202,46 @@ cd-rm()
 
     cd-history
     return 0
+}
+
+cd-search()
+{
+    cd-history -n
+
+    prompt="(reverse-cd-search)"
+    IFS=
+    read -s -p "${prompt}: \"\" " -n 1 c || return $?
+    [ "$c" == "" ] && return 0
+    str=""
+    pat=""
+
+    while true; do
+        if [ "$c" == "" ]; then
+            if [ ${#str} -ne 0 ]; then
+                str=${str:0:${#str}-1}
+                pat=${pat:0:${#pat}-3}
+            fi
+        elif [ "$c" == "" ]; then
+            str=""
+            pat=""
+        elif [ "$c" != "" ]; then
+            str+=$c
+            pat+=".*$c"
+        fi
+
+        #(
+            #cd-history -n
+        #) | grep "$pat" 
+        res=($(cd-history -n))
+        for r in "${res[@]}"; do
+            echo $r | grep "$pat"
+        done
+
+
+        read -s -p "${prompt} \"${str}\" " -n 1 c || return $?
+        echo ""
+        [ "$c" == "" ] && return 0
+    done
 }
 
 
